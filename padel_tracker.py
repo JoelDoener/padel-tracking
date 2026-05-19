@@ -81,14 +81,25 @@ def build_rows(snapshot_ts: datetime, target_date: date, api_data: list) -> list
         court_name  = COURTS.get(resource_id, resource_id)  # Fallback: UUID
 
         for slot in court_data.get("slots", []):
-            start_time   = slot.get("start_time", "")[:5]   # "09:30:00" → "09:30"
+            raw_time = slot.get("start_time", "")[:5]
+            if raw_time:
+                from datetime import timezone
+                utc_dt = datetime.combine(target_date,
+                             datetime.strptime(raw_time, "%H:%M").time(),
+                             tzinfo=timezone.utc)
+                local_dt = utc_dt.astimezone(TIMEZONE)
+                start_time = local_dt.strftime("%H:%M")
+                slot_date  = local_dt.date()
+            else:
+                start_time = ""
+                slot_date  = target_date
             duration_min = slot.get("duration")
             price        = parse_price(slot.get("price"))
-            days_ahead   = (target_date - snapshot_ts.date()).days
+            days_ahead   = (slot_date - snapshot_ts.date()).days
 
             rows.append({
                 "datum_snapshot":  snapshot_ts.strftime("%Y-%m-%dT%H:%M:%S"),
-                "datum_slot":      target_date.isoformat(),
+                "datum_slot":      slot_date.isoformat(),
                 "uhrzeit_slot":    start_time,
                 "dauer_minuten":   duration_min,
                 "court":           court_name,
