@@ -28,15 +28,15 @@ BASE_URL   = "https://playtomic.com/api/clubs/availability"
 
 # Mapping resource_id → Court-Name (Reihenfolge = API-Reihenfolge)
 COURTS = {
-    "e0bb5565-5fed-49bd-bb82-3ae4c70f1971": "Outdoor 1",
+    "58480281-55d3-4964-ad4c-5b71eaf04d33": "Outdoor 1",
     "d3787f7c-7b6d-4352-a3f6-d25aeae35bad": "Outdoor 2",
-    "177fa8ca-a395-4398-b0b8-c1c65432e515": "Outdoor 3",
-    "99c89172-be8d-45ec-a1c3-fc2b173b9391": "Outdoor 4",
-    "4f754fb9-9b38-4eb0-9627-6a6161ec2ea0": "Indoor 1",
-    "58480281-55d3-4964-ad4c-5b71eaf04d33": "Indoor 2",
-    "01c0e205-a754-47b3-91df-5f576e938b7c": "Indoor 3",
-    "c270cf89-2ce3-4e45-9a55-dff31ba1c883": "Indoor 4",
-    "61b268a4-306b-407e-a8a1-86a9d624a909": "Single Indoor",
+    "4f754fb9-9b38-4eb0-9627-6a6161ec2ea0": "Outdoor 3",
+    "177fa8ca-a395-4398-b0b8-c1c65432e515": "Outdoor 4",
+    "99c89172-be8d-45ec-a1c3-fc2b173b9391": "Indoor 1",
+    "e0bb5565-5fed-49bd-bb82-3ae4c70f1971": "Indoor 2",
+    "61b268a4-306b-407e-a8a1-86a9d624a909": "Indoor 3",
+    "01c0e205-a754-47b3-91df-5f576e938b7c": "Indoor 4",
+    "c270cf89-2ce3-4e45-9a55-dff31ba1c883": "Single Indoor",
 }
 
 # Output-Ordner (lokal oder im Repo für GitHub Actions)
