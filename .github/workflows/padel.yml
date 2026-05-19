@@ -1,0 +1,32 @@
+name: Padel Tracker
+
+on:
+  schedule:
+      - cron: '25 * * * *'
+          - cron: '55 * * * *'
+            workflow_dispatch:
+
+            jobs:
+              track:
+                  runs-on: ubuntu-latest
+                      permissions:
+                            contents: write
+                                steps:
+                                      - uses: actions/checkout@v4
+
+                                            - uses: actions/setup-python@v5
+                                                    with:
+                                                              python-version: '3.11'
+
+                                                                    - run: pip install requests
+
+                                                                          - run: python padel_tracker.py
+                                                                                  env:
+                                                                                            PADEL_OUTPUT_DIR: snapshots
+
+                                                                                                  - run: |
+                                                                                                            git config user.name "padel-bot"
+                                                                                                                      git config user.email "bot@padel.local"
+                                                                                                                                git add snapshots/
+                                                                                                                                          git diff --cached --quiet || git commit -m "snapshot $(date -u +%Y-%m-%dT%H:%M)"
+                                                                                                                                                    git push
