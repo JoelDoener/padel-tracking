@@ -122,7 +122,7 @@ def main():
     venue_cfg  = VENUES[args.venue]
     tenant_id  = venue_cfg["tenant_id"]
     courts     = venue_cfg["courts"]
-    output_dir = Path("/root/padel-tracking") / args.venue / "snapshots"
+    output_dir = Path("/root/padel-tracking") / args.venue
 
     snapshot_ts = datetime.now(tz=TIMEZONE)
     output_path = output_dir / snapshot_ts.strftime("snapshot_%Y-%m-%d_%H%M.csv")
