@@ -38,8 +38,8 @@ VENUES = {
     "jesteburg": {
         "tenant_id": "62cb46b5-91e2-44c9-b693-299024b161b0",
         "courts": {
-            "1775a96d-3c87-4e34-9ff5-c6bdb18e942c": "Padel 2",
-            "7e773233-957f-4720-bb73-d3d30dfa5e62": "Padel 3",
+            "1775a96d-3c87-4e34-9ff5-c6bdb18e942c": "Padel 3",
+            "7e773233-957f-4720-bb73-d3d30dfa5e62": "Padel 2",
             "197daebf-3b85-418d-92af-f316069711b2": "Padel 4",
             "ee751119-7276-413a-8e94-d75cfec7f672": "Padel 1",
         },
