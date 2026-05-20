@@ -1,61 +1,62 @@
 """
-Padel Amigos Hamburg — Availability Tracker
+Padel Amigos — Availability Tracker (Multi-Venue)
 Nutzt die Playtomic API direkt (kein Browser, kein Playwright).
-Läuft täglich per Cron oder GitHub Actions.
 
 Setup:
     pip install requests
 
-Cron (alle 30 min, 5 vor):
-    25,55 * * * * python3 /path/to/padel_tracker.py
+Cron (8x pro Stunde):
+    25,29,30,31,55,59 * * * * python3 /root/padel-tracking/padel_tracker.py --venue halstenbek
+    25,29,30,31,55,59 * * * * python3 /root/padel-tracking/padel_tracker.py --venue jesteburg
+    0,1 * * * * python3 /root/padel-tracking/padel_tracker.py --venue halstenbek
+    0,1 * * * * python3 /root/padel-tracking/padel_tracker.py --venue jesteburg
 """
 
+import argparse
 import csv
 import json
-import os
 import requests
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-# ── Konfiguration ────────────────────────────────────────────────────────────
+VENUES = {
+    "halstenbek": {
+        "tenant_id": "47894b5e-7299-42b4-b3df-9a82d75e55a3",
+        "courts": {
+            "58480281-55d3-4964-ad4c-5b71eaf04d33": "Outdoor 1",
+            "d3787f7c-7b6d-4352-a3f6-d25aeae35bad": "Outdoor 2",
+            "4f754fb9-9b38-4eb0-9627-6a6161ec2ea0": "Outdoor 3",
+            "177fa8ca-a395-4398-b0b8-c1c65432e515": "Outdoor 4",
+            "99c89172-be8d-45ec-a1c3-fc2b173b9391": "Indoor 1",
+            "e0bb5565-5fed-49bd-bb82-3ae4c70f1971": "Indoor 2",
+            "61b268a4-306b-407e-a8a1-86a9d624a909": "Indoor 3",
+            "01c0e205-a754-47b3-91df-5f576e938b7c": "Indoor 4",
+            "c270cf89-2ce3-4e45-9a55-dff31ba1c883": "Single Indoor",
+        },
+    },
+    "jesteburg": {
+        "tenant_id": "62cb46b5-91e2-44c9-b693-299024b161b0",
+        "courts": {
+            "1775a96d-3c87-4e34-9ff5-c6bdb18e942c": "Court 1",
+            "7e773233-957f-4720-bb73-d3d30dfa5e62": "Court 2",
+            "197daebf-3b85-418d-92af-f316069711b2": "Court 3",
+            "ee751119-7276-413a-8e94-d75cfec7f672": "Court 4",
+        },
+    },
+}
 
-TENANT_ID  = "47894b5e-7299-42b4-b3df-9a82d75e55a3"
 SPORT_ID   = "PADEL"
 DAYS_AHEAD = 14
 TIMEZONE   = ZoneInfo("Europe/Berlin")
 BASE_URL   = "https://playtomic.com/api/clubs/availability"
 
-# Mapping resource_id → Court-Name (Reihenfolge = API-Reihenfolge)
-COURTS = {
-    "58480281-55d3-4964-ad4c-5b71eaf04d33": "Outdoor 1",
-    "d3787f7c-7b6d-4352-a3f6-d25aeae35bad": "Outdoor 2",
-    "4f754fb9-9b38-4eb0-9627-6a6161ec2ea0": "Outdoor 3",
-    "177fa8ca-a395-4398-b0b8-c1c65432e515": "Outdoor 4",
-    "99c89172-be8d-45ec-a1c3-fc2b173b9391": "Indoor 1",
-    "e0bb5565-5fed-49bd-bb82-3ae4c70f1971": "Indoor 2",
-    "61b268a4-306b-407e-a8a1-86a9d624a909": "Indoor 3",
-    "01c0e205-a754-47b3-91df-5f576e938b7c": "Indoor 4",
-    "c270cf89-2ce3-4e45-9a55-dff31ba1c883": "Single Indoor",
-}
 
-# Output-Ordner (lokal oder im Repo für GitHub Actions)
-OUTPUT_DIR = Path(os.getenv("PADEL_OUTPUT_DIR", 
-                  Path.home() / "Documents" / "Padel-Tracking" / "snapshots"))
-
-# ── Hilfsfunktionen ──────────────────────────────────────────────────────────
-
-def fetch_slots(target_date: date) -> list[dict]:
-    """Holt alle freien Slots für einen Tag von der Playtomic API."""
-    params = {
-        "tenant_id": TENANT_ID,
-        "date": target_date.isoformat(),
-        "sport_id": SPORT_ID,
-    }
+def fetch_slots(tenant_id: str, target_date: date) -> list[dict]:
+    params = {"tenant_id": tenant_id, "date": target_date.isoformat(), "sport_id": SPORT_ID}
     headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                      "AppleWebKit/537.36 (KHTML, like Gecko) "
-                      "Chrome/124.0.0.0 Safari/537.36",
+                      "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         "Accept": "application/json",
     }
     resp = requests.get(BASE_URL, params=params, headers=headers, timeout=15)
@@ -64,7 +65,6 @@ def fetch_slots(target_date: date) -> list[dict]:
 
 
 def parse_price(price_str: str | None) -> float | None:
-    """Extrahiert float aus '30 EUR' → 30.0"""
     if not price_str:
         return None
     try:
@@ -73,50 +73,40 @@ def parse_price(price_str: str | None) -> float | None:
         return None
 
 
-def build_rows(snapshot_ts: datetime, target_date: date, api_data: list) -> list[dict]:
-    """Konvertiert API-Antwort in CSV-Zeilen."""
+def build_rows(snapshot_ts: datetime, target_date: date, api_data: list, courts: dict) -> list[dict]:
     rows = []
     for court_data in api_data:
         resource_id = court_data.get("resource_id", "")
-        court_name  = COURTS.get(resource_id, resource_id)  # Fallback: UUID
-
+        court_name  = courts.get(resource_id, resource_id)
         for slot in court_data.get("slots", []):
             raw_time = slot.get("start_time", "")[:5]
             if raw_time:
-                from datetime import timezone
-                utc_dt = datetime.combine(target_date,
-                             datetime.strptime(raw_time, "%H:%M").time(),
-                             tzinfo=timezone.utc)
+                utc_dt   = datetime.combine(target_date,
+                               datetime.strptime(raw_time, "%H:%M").time(),
+                               tzinfo=timezone.utc)
                 local_dt = utc_dt.astimezone(TIMEZONE)
                 start_time = local_dt.strftime("%H:%M")
                 slot_date  = local_dt.date()
             else:
                 start_time = ""
                 slot_date  = target_date
-            duration_min = slot.get("duration")
-            price        = parse_price(slot.get("price"))
-            days_ahead   = (slot_date - snapshot_ts.date()).days
-
             rows.append({
-                "datum_snapshot":  snapshot_ts.strftime("%Y-%m-%dT%H:%M:%S"),
-                "datum_slot":      slot_date.isoformat(),
-                "uhrzeit_slot":    start_time,
-                "dauer_minuten":   duration_min,
-                "court":           court_name,
-                "preis":           price,
-                "status":          "frei",
-                "tage_im_voraus":  days_ahead,
+                "datum_snapshot": snapshot_ts.strftime("%Y-%m-%dT%H:%M:%S"),
+                "datum_slot":     slot_date.isoformat(),
+                "uhrzeit_slot":   start_time,
+                "dauer_minuten":  slot.get("duration"),
+                "court":          court_name,
+                "preis":          parse_price(slot.get("price")),
+                "status":         "frei",
+                "tage_im_voraus": (slot_date - snapshot_ts.date()).days,
             })
     return rows
 
 
 def write_csv(rows: list[dict], path: Path) -> None:
-    """Schreibt Zeilen in eine CSV-Datei."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    fieldnames = [
-        "datum_snapshot", "datum_slot", "uhrzeit_slot",
-        "dauer_minuten", "court", "preis", "status", "tage_im_voraus"
-    ]
+    fieldnames = ["datum_snapshot", "datum_slot", "uhrzeit_slot",
+                  "dauer_minuten", "court", "preis", "status", "tage_im_voraus"]
     with open(path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
@@ -124,39 +114,40 @@ def write_csv(rows: list[dict], path: Path) -> None:
     print(f"  ✓ {len(rows)} Zeilen → {path}")
 
 
-# ── Hauptprogramm ────────────────────────────────────────────────────────────
-
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--venue", required=True, choices=list(VENUES.keys()))
+    args = parser.parse_args()
+
+    venue_cfg  = VENUES[args.venue]
+    tenant_id  = venue_cfg["tenant_id"]
+    courts     = venue_cfg["courts"]
+    output_dir = Path("/root/padel-tracking") / args.venue / "snapshots"
+
     snapshot_ts = datetime.now(tz=TIMEZONE)
-    filename    = snapshot_ts.strftime("snapshot_%Y-%m-%d_%H%M.csv")
-    output_path = OUTPUT_DIR / filename
+    output_path = output_dir / snapshot_ts.strftime("snapshot_%Y-%m-%d_%H%M.csv")
 
-    print(f"\nPadel Tracker — {snapshot_ts.strftime('%Y-%m-%d %H:%M')} Uhr")
-    print(f"Scanne {DAYS_AHEAD + 1} Tage ({date.today()} bis "
-          f"{date.today() + timedelta(days=DAYS_AHEAD)})\n")
+    print(f"\nPadel Tracker [{args.venue}] — {snapshot_ts.strftime('%Y-%m-%d %H:%M')} Uhr")
+    print(f"Scanne {DAYS_AHEAD + 1} Tage ({date.today()} bis {date.today() + timedelta(days=DAYS_AHEAD)})\n")
 
-    all_rows = []
-    errors   = []
+    all_rows, errors = [], []
 
     for i in range(DAYS_AHEAD + 1):
         target_date = date.today() + timedelta(days=i)
-        label = f"Tag +{i:02d}  {target_date}"
         try:
-            api_data = fetch_slots(target_date)
-            rows     = build_rows(snapshot_ts, target_date, api_data)
+            api_data = fetch_slots(tenant_id, target_date)
+            rows     = build_rows(snapshot_ts, target_date, api_data, courts)
             all_rows.extend(rows)
-
             slot_count = sum(len(c.get("slots", [])) for c in api_data)
-            print(f"  {label}  →  {slot_count} freie Slots "
-                  f"({len(api_data)} Courts)")
+            print(f"  Tag +{i:02d}  {target_date}  →  {slot_count} freie Slots ({len(api_data)} Courts)")
         except Exception as e:
-            print(f"  {label}  →  FEHLER: {e}")
+            print(f"  Tag +{i:02d}  {target_date}  →  FEHLER: {e}")
             errors.append({"date": target_date.isoformat(), "error": str(e)})
 
     write_csv(all_rows, output_path)
 
     if errors:
-        err_path = OUTPUT_DIR / f"errors_{snapshot_ts.strftime('%Y-%m-%d_%H%M')}.json"
+        err_path = output_dir / f"errors_{snapshot_ts.strftime('%Y-%m-%d_%H%M')}.json"
         err_path.write_text(json.dumps(errors, indent=2))
         print(f"\n  ⚠ {len(errors)} Fehler → {err_path}")
 
