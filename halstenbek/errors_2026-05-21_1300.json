@@ -1,0 +1,22 @@
+[
+  {
+    "date": "2026-05-27",
+    "error": "HTTPSConnectionPool(host='playtomic.com', port=443): Read timed out. (read timeout=15)"
+  },
+  {
+    "date": "2026-05-28",
+    "error": "HTTPSConnectionPool(host='playtomic.com', port=443): Read timed out. (read timeout=15)"
+  },
+  {
+    "date": "2026-05-31",
+    "error": "502 Server Error: Bad Gateway for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-05-31&sport_id=PADEL"
+  },
+  {
+    "date": "2026-06-01",
+    "error": "502 Server Error: Bad Gateway for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-06-01&sport_id=PADEL"
+  },
+  {
+    "date": "2026-06-04",
+    "error": "502 Server Error: Bad Gateway for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-06-04&sport_id=PADEL"
+  }
+]
