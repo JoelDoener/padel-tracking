@@ -1,0 +1,62 @@
+[
+  {
+    "date": "2026-06-08",
+    "error": "403 Client Error: Forbidden for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-06-08&sport_id=PADEL"
+  },
+  {
+    "date": "2026-06-09",
+    "error": "403 Client Error: Forbidden for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-06-09&sport_id=PADEL"
+  },
+  {
+    "date": "2026-06-10",
+    "error": "403 Client Error: Forbidden for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-06-10&sport_id=PADEL"
+  },
+  {
+    "date": "2026-06-11",
+    "error": "403 Client Error: Forbidden for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-06-11&sport_id=PADEL"
+  },
+  {
+    "date": "2026-06-12",
+    "error": "403 Client Error: Forbidden for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-06-12&sport_id=PADEL"
+  },
+  {
+    "date": "2026-06-13",
+    "error": "403 Client Error: Forbidden for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-06-13&sport_id=PADEL"
+  },
+  {
+    "date": "2026-06-14",
+    "error": "403 Client Error: Forbidden for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-06-14&sport_id=PADEL"
+  },
+  {
+    "date": "2026-06-15",
+    "error": "403 Client Error: Forbidden for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-06-15&sport_id=PADEL"
+  },
+  {
+    "date": "2026-06-16",
+    "error": "403 Client Error: Forbidden for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-06-16&sport_id=PADEL"
+  },
+  {
+    "date": "2026-06-17",
+    "error": "403 Client Error: Forbidden for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-06-17&sport_id=PADEL"
+  },
+  {
+    "date": "2026-06-18",
+    "error": "403 Client Error: Forbidden for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-06-18&sport_id=PADEL"
+  },
+  {
+    "date": "2026-06-19",
+    "error": "403 Client Error: Forbidden for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-06-19&sport_id=PADEL"
+  },
+  {
+    "date": "2026-06-20",
+    "error": "403 Client Error: Forbidden for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-06-20&sport_id=PADEL"
+  },
+  {
+    "date": "2026-06-21",
+    "error": "403 Client Error: Forbidden for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-06-21&sport_id=PADEL"
+  },
+  {
+    "date": "2026-06-22",
+    "error": "403 Client Error: Forbidden for url: https://playtomic.com/api/clubs/availability?tenant_id=47894b5e-7299-42b4-b3df-9a82d75e55a3&date=2026-06-22&sport_id=PADEL"
+  }
+]
